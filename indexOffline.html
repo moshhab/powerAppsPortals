@@ -1,1 +1,49 @@
-commint
+{% include 'WrapperAJAX' %}
+<div class="jumbotron text-center">
+  <h1>Notes</h1>
+</div>
+<div class="container-fluid w-25">
+  <div class="input-group mb-1 justify-content-center">
+    <input
+      placeholder="Enter a your note"
+      id="inputNote"
+      class="input-group-prepend flex-colunm col"
+    />
+    <input
+      class="btn btn-dark btn-group-text offset-md-0"
+      type="button"
+      id="addBtn"
+      value="Add"
+    />
+  </div>
+
+  {% fetchxml notes %}
+  <fetch mapping="logical" version="1.0">
+    <entity name="cr787_note">
+      <all-attributes />
+    </entity>
+  </fetch>
+  {% endfetchxml %} 
+  
+  
+  <div id="listOut" class="list-group">
+    {% for note in notes.results.entities %}
+    <div  class="col list-group-item list-group-item-dark">
+      {{note.notecontent}}
+      <input class="form-check-input" type="checkbox" >
+      <button
+        class="col btn btn-dark btn-label float-lg-end"
+      >
+        Delete
+      </button>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<script>
+  
+  $(document).ready(() => {
+    
+  });
+</script>
