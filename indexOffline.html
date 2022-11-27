@@ -14,6 +14,7 @@
       type="button"
       id="addBtn"
       value="Add"
+      onclick="noteSubmit()"
     />
   </div>
 
@@ -22,6 +23,7 @@
   <entity name="cr787_note">
     <attribute name="cr787_notecontent" />
     <attribute name="cr787_checked" />
+    <attribute name="cr787_noteid" />
   </entity>
 </fetch>
   {% endfetchxml %} 
@@ -34,6 +36,7 @@
       <input class="form-check-input" type="checkbox">
       <button
         class="col btn btn-dark btn-label float-lg-end"
+        onclick="noteDelete(`{{note.cr787_noteid}}`)"
       >
         Delete
       </button>
@@ -41,10 +44,32 @@
     {% endfor %}
   </div>
 </div>
- let notes=[];
-  {% for note in notes.results.entities %}
-  
-  {% endfor %}
-<script>
  
+<script>
+ function noteSubmit(){
+  let noteText = $("#inputNote").val();
+  let noteObject={
+    "cr787_notecontent":`${noteText}`,
+    "cr787_checked":false
+  }
+  webapi.safeAjax({
+      type: "POST",
+      url: "/_api/cr787_notes",
+      contentType: "application/json",
+      data: JSON.stringify(noteObject),
+      success: function () {
+        console.log("added")
+      }
+    });
+ }
+ function noteDelete(id){
+  webapi.safeAjax({
+		type: "DELETE",
+		url: `/_api/cr787_notes(${id})`,
+		contentType: "application/json",
+		success: function (res) {
+			console.log(res);
+		}
+  });
+ }
 </script>
