@@ -19,21 +19,23 @@
   </div>
 
   {% fetchxml notes %}
-<fetch mapping="logical" version="1.0">
-  <entity name="cr787_note">
-    <attribute name="cr787_notecontent" />
-    <attribute name="cr787_checked" />
-    <attribute name="cr787_noteid" />
-  </entity>
-</fetch>
-  {% endfetchxml %} 
-  
-  
+  <fetch mapping="logical" version="1.0">
+    <entity name="cr787_note">
+      <all-attributes />
+    </entity>
+  </fetch>
+  {% endfetchxml %}
+
   <div id="listOut" class="list-group">
     {% for note in notes.results.entities %}
-    <div  class="col list-group-item list-group-item-dark">
-      {{note.cr787_notecontent}}
-      <input class="form-check-input" type="checkbox">
+    <div class="col list-group-item list-group-item-dark">
+      {{note.cr787_name}}
+      <input
+        id="{{note.cr787_noteid}}"
+        class="form-check-input"
+        type="checkbox"
+        onclick="checkBox(`{{note.cr787_noteid}}`,`{{note.cr787_checked}}`)"
+      />
       <button
         class="col btn btn-dark btn-label float-lg-end"
         onclick="noteDelete(`{{note.cr787_noteid}}`)"
@@ -44,32 +46,53 @@
     {% endfor %}
   </div>
 </div>
- 
+
 <script>
- function noteSubmit(){
-  let noteText = $("#inputNote").val();
-  let noteObject={
-    "cr787_notecontent":`${noteText}`,
-    "cr787_checked":false
-  }
-  webapi.safeAjax({
-      type: "POST",
-      url: "/_api/cr787_notes",
-      contentType: "application/json",
-      data: JSON.stringify(noteObject),
-      success: function () {
-        console.log("added")
-      }
+   {% for note in notes.results.entities %}
+  if({{note.cr787_checked}}){
+    $(`#{{note.cr787_noteid}}` ).prop( "checked", true )
+  }else { $(`#{{note.cr787_noteid}}` ).prop( "checked", false )}
+    {% endfor %}
+
+   function noteSubmit(){
+    let noteText = $("#inputNote").val();
+    let noteObject={
+      "cr787_name":`${noteText}`,
+      "cr787_checked":false
+    }
+    webapi.safeAjax({
+        type: "POST",
+        url: "/_api/cr787_notes",
+        contentType: "application/json",
+        data: JSON.stringify(noteObject),
+        success: function () {
+          console.log("added")
+        }
+      });
+   }
+   function noteDelete(id){
+    webapi.safeAjax({
+  		type: "DELETE",
+  		url: `/_api/cr787_notes(${id})`,
+  		contentType: "application/json",
+  		success: function (res) {
+  			console.log(res);
+  		}
     });
- }
- function noteDelete(id){
-  webapi.safeAjax({
-		type: "DELETE",
-		url: `/_api/cr787_notes(${id})`,
-		contentType: "application/json",
-		success: function (res) {
-			console.log(res);
-		}
-  });
- }
+  }
+  function checkBox(id,checked){
+      let noteObject={
+      "cr787_checked":checked!=="true"
+    }
+    webapi.safeAjax({
+        type: "PATCH",
+        url: `/_api/cr787_notes(${id})`,
+        contentType: "application/json",
+        data: JSON.stringify(noteObject),
+        success: function () {
+          console.log("checked")
+        }
+      });
+    
+  }
 </script>
