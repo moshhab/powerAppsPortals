@@ -18,19 +18,20 @@
   </div>
 
   {% fetchxml notes %}
-  <fetch mapping="logical" version="1.0">
-    <entity name="cr787_note">
-      <all-attributes />
-    </entity>
-  </fetch>
+<fetch mapping="logical" version="1.0">
+  <entity name="cr787_note">
+    <attribute name="cr787_notecontent" />
+    <attribute name="cr787_checked" />
+  </entity>
+</fetch>
   {% endfetchxml %} 
   
   
   <div id="listOut" class="list-group">
     {% for note in notes.results.entities %}
     <div  class="col list-group-item list-group-item-dark">
-      {{note.notecontent}}
-      <input class="form-check-input" type="checkbox" >
+      {{note.cr787_notecontent}}
+      <input class="form-check-input" type="checkbox">
       <button
         class="col btn btn-dark btn-label float-lg-end"
       >
@@ -40,10 +41,10 @@
     {% endfor %}
   </div>
 </div>
-
-<script>
+ let notes=[];
+  {% for note in notes.results.entities %}
   
-  $(document).ready(() => {
-    
-  });
+  {% endfor %}
+<script>
+ 
 </script>
