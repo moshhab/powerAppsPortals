@@ -23,35 +23,61 @@
   </fetch>
   {% endfetchxml %}
 
-  <div id="listOut" class="list-group">
-    {% for note in notes.results.entities %}
-    <div class="col list-group-item list-group-item-dark">
-      {{note.cr787_name}}
-      <input
-        id="{{note.cr787_noteid}}"
-        class="form-check-input"
-        type="checkbox"
-        onclick="checkBox(`{{note.cr787_noteid}}`,`{{note.cr787_checked}}`)"
-      />
-      <button
-        class="col btn btn-dark btn-label float-lg-end"
-        onclick="noteDelete(`{{note.cr787_noteid}}`)"
-      >
-        Delete
-      </button>
-    </div>
-    {% endfor %}
-  </div>
+  <div id="listOut" class="list-group"></div>
 </div>
 
 <script>
-   {% for note in notes.results.entities %}
-  if({{note.cr787_checked}}){
-    $(`#{{note.cr787_noteid}}` ).prop( "checked", true )
-  }else { $(`#{{note.cr787_noteid}}` ).prop( "checked", false )}
-    {% endfor %}
+  let notes=[];
+  $(document).ready(
+    function noteStore(){
+      {% for note in notes.results.entities %}
+      notes.unshift({
+        name:"{{note.cr787_name}}",
+        noteid:"{{note.cr787_noteid}}",
+        checked:{{note.cr787_checked}}
+      })
+      {% endfor %}
+      
+      notesList();
+      noteCheck();
+      checkBox();
+      noteDelete();
+    } 
+  )
+  
+  function noteCheck(){
+     notes.map((note) => {
+      if(note.checked){
+         $(`#${note.noteid}` ).prop( "checked", true )
+      }else { 
+        $(`#${note.noteid}` ).prop( "checked", false )
+      }
+     })
+   }
+   
 
-   function noteSubmit(){
+  
+
+  function notesList() {
+    $("#listOut").empty();
+    notes.map((note, index) => {
+        $("#listOut").append(` <div class="col list-group-item  list-group-item-dark" >
+                                ${note.name}
+                                <input
+                                  id="${note.noteid}"
+                                  class="form-check-input"
+                                  type="checkbox"
+                                />
+                                <button
+                                  class="col btn btn-dark btn-label float-lg-end"
+                                  id="${index}"
+                                >
+                                  Delete
+                                </button>
+                            </div>`);
+    })
+  } 
+  function noteSubmit(){
     let noteText = $("#inputNote").val();
     let noteObject={
       "cr787_name":`${noteText}`,
@@ -66,30 +92,42 @@
           console.log("added")
         }
       });
+    notes.unshift(noteObject)
    }
-   function noteDelete(id){
-    webapi.safeAjax({
-  		type: "DELETE",
-  		url: `/_api/cr787_notes(${id})`,
-  		contentType: "application/json",
-  		success: function (res) {
-  			console.log(res);
-  		}
-    });
+  function noteDelete(){
+    notes.map((note,index)=>{
+      $(`#${index}`).click( function (){ 
+        webapi.safeAjax({
+          type: "DELETE",
+          url: `/_api/cr787_notes(${note.noteid})`,
+          contentType: "application/json",
+          success: function () {
+            console.log("deleted");
+          }
+        });
+        notes.splice(index,1)
+        notesList();
+      })
+    })
   }
-  function checkBox(id,checked){
-      let noteObject={
-      "cr787_checked":checked!=="true"
-    }
-    webapi.safeAjax({
-        type: "PATCH",
-        url: `/_api/cr787_notes(${id})`,
-        contentType: "application/json",
-        data: JSON.stringify(noteObject),
-        success: function () {
-          console.log("checked")
+  function checkBox(){
+    notes.map((note)=>{
+      $(`#${note.noteid}`).click( function (){  
+        console.log(note,"s")
+        let noteObject={
+          "cr787_checked":!note.checked
         }
-      });
-    
+        webapi.safeAjax({
+            type: "PATCH",
+            url: `/_api/cr787_notes(${note.noteid})`,
+            contentType: "application/json",
+            data: JSON.stringify(noteObject),
+            success: function () {
+              console.log("checked")
+            }
+        });
+        note.checked=!note.checkBox
+      }) 
+    })
   }
 </script>
